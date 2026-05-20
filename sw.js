@@ -1,5 +1,5 @@
 /* THE CALENDAR - Service Worker */
-const VERSION = 'v1.0.3';
+const VERSION = 'v1.0.4';
 const CACHE_NAME = 'the-calendar-' + VERSION;
 
 const PRECACHE_URLS = [
@@ -10,12 +10,10 @@ const PRECACHE_URLS = [
   './icon-512.png'
 ];
 
-// install: precache
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      // 個別追加にして 1つ失敗しても全体は成功させる
       return Promise.all(
         PRECACHE_URLS.map((url) =>
           cache.add(new Request(url, { cache: 'reload' })).catch(() => null)
@@ -25,7 +23,6 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// activate: 古いキャッシュ削除
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
@@ -34,17 +31,12 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// 戦略: HTML/同一オリジン静的ファイル → Cache First（HTMLはネット優先 + キャッシュフォールバック）
-// GitHub API / 外部 → 触らない（パススルー）
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-
-  // 外部APIなどはSWを通さない
   if (url.origin !== self.location.origin) return;
 
-  // ナビゲーション(HTML)はネットワーク優先 → 失敗時キャッシュ
   if (req.mode === 'navigate' || req.destination === 'document') {
     event.respondWith(
       fetch(req)
@@ -58,7 +50,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 静的ファイル: Cache First
   event.respondWith(
     caches.match(req).then((cached) => {
       if (cached) return cached;
@@ -75,7 +66,6 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// クライアントから手動でskipWaiting要求
 self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
