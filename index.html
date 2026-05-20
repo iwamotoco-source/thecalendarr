@@ -249,7 +249,7 @@
     .dayoffTypes{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
     .dayoffType{border:1px solid #34374a;background:#1b1d29;color:var(--muted);border-radius:999px;padding:5px 9px;cursor:pointer;font-size:.7rem;font-weight:800}
     .dayoffType.active{border-color:#22c55e;background:rgba(34,197,94,.15);color:#86efac}
-    .profileGate{position:fixed;inset:0;z-index:100;display:none}
+    .profileGate{position:fixed;inset:0;z-index:130;display:none}
     .profileGate.open{display:block}
     .gateBg{position:absolute;inset:0;background:radial-gradient(circle at top,rgba(255,255,255,.08),transparent 30%),linear-gradient(180deg,#050507,#0b0b10 45%,#12121a)}
     .gateInner{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;padding-bottom:calc(24px + var(--safe-bottom))}
@@ -289,7 +289,7 @@
     .bottomPlus{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--accentGrad);color:#fff;font-size:1.4rem;font-weight:900;pointer-events:none}
     .toastWrap{position:fixed;right:14px;bottom:calc(80px + var(--safe-bottom));z-index:90;display:flex;flex-direction:column;gap:7px;pointer-events:none}
     .toast{background:#161723;border:1px solid rgba(255,255,255,.08);color:var(--text);padding:10px 12px;border-radius:12px;box-shadow:var(--shadow);font-size:.8rem;max-width:280px;pointer-events:auto}
-    .splash{position:fixed;inset:0;z-index:120;background:radial-gradient(circle at center,rgba(255,255,255,.04),transparent 28%),linear-gradient(180deg,#000 0%,#090909 45%,#111 100%);display:grid;place-items:center;overflow:hidden;transition:opacity .6s ease,visibility .6s ease}
+    .splash{position:fixed;inset:0;z-index:140;background:radial-gradient(circle at center,rgba(255,255,255,.04),transparent 28%),linear-gradient(180deg,#000 0%,#090909 45%,#111 100%);display:grid;place-items:center;overflow:hidden;transition:opacity .6s ease,visibility .6s ease}
     .splash.hide{opacity:0;visibility:hidden;pointer-events:none}
     .sGlow{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(229,9,20,.22) 0%,rgba(229,9,20,.1) 38%,transparent 70%);filter:blur(22px);animation:glowPulse 1.85s ease-in-out forwards}
     .sLight{position:absolute;top:0;bottom:0;width:100px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.03) 20%,rgba(255,255,255,.16) 45%,rgba(229,9,20,.58) 50%,rgba(255,255,255,.14) 55%,rgba(255,255,255,.02) 80%,transparent);transform:translateX(-180vw) skewX(-16deg);filter:blur(2px);animation:lightSweep 1.35s cubic-bezier(.22,.8,.2,1) .15s forwards}
@@ -386,15 +386,6 @@
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="apple-touch-icon" href="./icon-192.png">
   <link rel="icon" href="./icon-192.png">
-
-  <link rel="manifest" href="/thecalendarr/manifest.json">
-  <meta name="theme-color" content="#ff0a0a">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="The Calendar">
-  <meta name="mobile-web-app-capable" content="yes">
-  <link rel="apple-touch-icon" href="/thecalendarr/icon-192.png">
-  <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/thecalendarr/sw.js').catch(()=>{});});}</script>
 </head>
 <body class="user-conan">
   <div class="wallpaper" id="wallpaper"></div>
@@ -402,7 +393,8 @@
     <div class="sGlow"></div><div class="sLight"></div>
     <div class="sCenter"><div class="sLogo">THE CALENDAR</div><div class="sName">THE CALENDAR</div><div class="sSub">CONAN&amp;KAORI</div></div>
   </div>
-  <div class="profileGate" id="profileGate">
+  <!-- スプラッシュ後すぐにプロフィール選択が見えるよう、最初からopenを付けておく -->
+  <div class="profileGate open" id="profileGate">
     <div class="gateBg"></div>
     <div class="gateInner">
       <div class="gateBrand">THE CALENDAR</div>
@@ -414,8 +406,8 @@
   </div>
 
   <div class="pinGate" id="pinGate">
-    <div class="pinTitle">PIN CODE</div>
-    <div class="pinSub">同期トークンを復号します</div>
+    <div class="pinTitle" id="pinTitle">PIN CODE</div>
+    <div class="pinSub" id="pinSub">同期トークンを復号します</div>
     <div class="pinError" id="pinError"></div>
     <div class="pinDots"><div class="pinDot" id="pd1"></div><div class="pinDot" id="pd2"></div><div class="pinDot" id="pd3"></div><div class="pinDot" id="pd4"></div></div>
     <div class="pinPad">
@@ -556,12 +548,12 @@
         <div class="row">
           <label class="label">プロフィール画像: 推奨 400×400px</label>
           <input class="input" type="file" id="profileFileInput" accept="image/*" onchange="onProfileImageChange(event)">
-          <div class="themeHelp">※ 自動圧縮されます（上限 200KB）</div>
+          <div class="themeHelp">※ 自動圧縮されます（上限 200KB）／ Gistで同期されます</div>
         </div>
         <div class="row">
           <label class="label">壁紙: 推奨 1200×600px</label>
           <input class="input" type="file" id="profileWallpaperInput" accept="image/*" onchange="onWallpaperChange(event)">
-          <div class="themeHelp">※ 自動圧縮されます（上限 400KB）</div>
+          <div class="themeHelp">※ 自動圧縮されます（上限 400KB）／ 端末ローカル保存のみ</div>
         </div>
         <div class="actions">
           <button class="btn danger" style="margin-right:auto" onclick="removeProfileImage()">画像削除</button>
@@ -595,11 +587,13 @@
               <button class="btn primary" onclick="saveSettings()">設定保存</button>
               <button class="btn ghost" onclick="syncToGist(true)">↑ Gistへ保存</button>
               <button class="btn ghost" onclick="pullFromGist(true)">↓ Gistから取得</button>
+              <button class="btn ghost" onclick="startPinSetup()">🔐 PIN設定</button>
               <button class="btn ghost" onclick="exportBackup()">💾 バックアップ書出</button>
               <button class="btn ghost" onclick="document.getElementById('restoreFileInput').click()">📂 復元</button>
               <input type="file" id="restoreFileInput" accept="application/json" style="display:none" onchange="importBackup(event)">
               <button class="btn ghost" onclick="closeSettings()">閉じる</button>
             </div>
+            <div class="settingHint" style="margin-top:8px">「🔐 PIN設定」を押すと、現在入力中のTokenを任意の4桁PINで暗号化し、次回以降PINだけで復号できます。</div>
           </div>
         </div>
       </div>
@@ -640,7 +634,7 @@
     };
 
     var DEFAULT_SETTINGS = {weekStartsMonday:false,showHero:true,showStats:true,showProfileGateOnLaunch:true};
-    var DEFAULT_SYNC = {gistId:'0cc0ace61e43ab7603606b686217211c',githubToken:'',autoSync:false,lastSyncAt:'',encryptedToken:'VlpCb0l7A3N0eWFmCXRbdEJAdWJURUJ1c2ZbYWsGSFp8AgBYc35EXw==',lastSavedHash:''};
+    var DEFAULT_SYNC = {gistId:'',githubToken:'',autoSync:false,lastSyncAt:'',encryptedToken:'',lastSavedHash:''};
 
     var state = {
       currentUser:'conan',
@@ -650,8 +644,8 @@
       miniDate:new Date(new Date().getFullYear(),new Date().getMonth(),1),
       showShared:true,
       profiles:{
-        conan:{name:'Conan',image:'',wallpaper:'',theme:'conan_default',phone:'',email:''},
-        kaori:{name:'Kaori',image:'',wallpaper:'',theme:'kaori_default',phone:'',email:''}
+        conan:{name:'Conan',image:'',wallpaper:'',theme:'conan_default',phone:'',email:'',imageUpdatedAt:''},
+        kaori:{name:'Kaori',image:'',wallpaper:'',theme:'kaori_default',phone:'',email:'',imageUpdatedAt:''}
       },
       entries:{conan:[],kaori:[],shared_holidays:[]},
       filters:{users:['conan','kaori'],cats:['work','private','body','study','holiday','dayoff']},
@@ -662,21 +656,71 @@
     var entryDraft = {};
     var editingProfileUser = 'conan';
     var splashDone = false;
-    var saveDebounceTimer = null;
     var syncTimer = null;
     var syncInFlight = false;
     var lastPullAt = 0;
 
     /* ===== PIN LOGIC ===== */
+    var pinMode = 'decrypt'; // 'decrypt' | 'setup' | 'setup_confirm'
+    var pinFirst = '';
     var currentPin='';
-    function inputPin(n){ if(currentPin.length<4) currentPin+=n; updatePinDots(); if(currentPin.length===4) setTimeout(verifyPin,100); }
+    function inputPin(n){ if(currentPin.length<4) currentPin+=n; updatePinDots(); if(currentPin.length===4) setTimeout(function(){ handlePinComplete(); },100); }
     function clearPin(){ currentPin=''; updatePinDots(); var pe=document.getElementById('pinError'); if(pe) pe.textContent=''; }
     function updatePinDots(){ for(var i=1;i<=4;i++){ var d=document.getElementById('pd'+i); if(d) d.classList.toggle('filled', i<=currentPin.length); } }
     function xorStr(str, key){ var r=''; for(var i=0;i<str.length;i++) r+=String.fromCharCode(str.charCodeAt(i)^key.charCodeAt(i%key.length)); return r; }
-    function openPinGate(){ currentPin=''; updatePinDots(); var pe=document.getElementById('pinError'); if(pe) pe.textContent=''; document.getElementById('pinGate').classList.add('open'); }
-    function openPinGateManual(){ closeSidebar(); openPinGate(); }
-    function closePinGate(){ document.getElementById('pinGate').classList.remove('open'); }
+
+    function openPinGate(mode){
+      pinMode = mode||'decrypt';
+      pinFirst = '';
+      currentPin = ''; updatePinDots();
+      var t=document.getElementById('pinTitle'); var s=document.getElementById('pinSub');
+      var pe=document.getElementById('pinError'); if(pe) pe.textContent='';
+      if(pinMode==='setup'){ t.textContent='PIN設定 (1/2)'; s.textContent='Token暗号化用のPIN(4桁)を入力'; }
+      else if(pinMode==='setup_confirm'){ t.textContent='PIN設定 (2/2)'; s.textContent='もう一度同じPINを入力してください'; }
+      else { t.textContent='PIN CODE'; s.textContent='同期トークンを復号します'; }
+      document.getElementById('pinGate').classList.add('open');
+    }
+    function openPinGateManual(){ closeSidebar(); openPinGate('decrypt'); }
+    function closePinGate(){ document.getElementById('pinGate').classList.remove('open'); pinMode='decrypt'; pinFirst=''; }
     function skipPin(){ closePinGate(); openSettings(); }
+
+    function handlePinComplete(){
+      if(pinMode==='setup'){
+        pinFirst = currentPin;
+        currentPin = '';
+        openPinGate('setup_confirm');
+        return;
+      }
+      if(pinMode==='setup_confirm'){
+        if(currentPin !== pinFirst){
+          var pe=document.getElementById('pinError'); if(pe) pe.textContent='PINが一致しません。最初からやり直してください';
+          currentPin=''; pinFirst=''; updatePinDots();
+          pinMode='setup';
+          setTimeout(function(){ openPinGate('setup'); }, 600);
+          return;
+        }
+        // 現在のTokenをこのPINで暗号化
+        var raw = state.sync.githubToken;
+        if(!raw){
+          toast('暗号化対象のTokenが空です');
+          closePinGate();
+          return;
+        }
+        try{
+          var enc = btoa(xorStr(raw, currentPin));
+          state.sync.encryptedToken = enc;
+          saveLocal();
+          toast('PINでTokenを暗号化しました ✓');
+        }catch(e){
+          toast('PIN設定に失敗しました');
+        }
+        closePinGate();
+        return;
+      }
+      // decrypt mode
+      verifyPin();
+    }
+
     function verifyPin(){
       if(!state.sync.encryptedToken){ closePinGate(); return; }
       try{
@@ -694,6 +738,16 @@
         var pe=document.getElementById('pinError'); if(pe) pe.textContent='PINが違います';
         currentPin=''; updatePinDots();
       }
+    }
+
+    function startPinSetup(){
+      // 設定画面で入力中のTokenを優先採用
+      var ti=document.getElementById('gistTokenInput');
+      var inputVal = ti ? sanitizeToken(ti.value) : '';
+      if(inputVal) state.sync.githubToken = inputVal;
+      if(!state.sync.githubToken){ toast('先にTokenを入力してください'); return; }
+      closeSettings();
+      openPinGate('setup');
     }
 
     /* ===== UTILS ===== */
@@ -740,20 +794,18 @@
     }
 
     /* ===== STORAGE ===== */
-    // 画像は別キーへ分離保存
     function saveImagesSeparately(){
       try{
         var imgs = {
-          conan:{image:state.profiles.conan.image||'', wallpaper:state.profiles.conan.wallpaper||''},
-          kaori:{image:state.profiles.kaori.image||'', wallpaper:state.profiles.kaori.wallpaper||''}
+          conan:{image:state.profiles.conan.image||'', wallpaper:state.profiles.conan.wallpaper||'', imageUpdatedAt:state.profiles.conan.imageUpdatedAt||''},
+          kaori:{image:state.profiles.kaori.image||'', wallpaper:state.profiles.kaori.wallpaper||'', imageUpdatedAt:state.profiles.kaori.imageUpdatedAt||''}
         };
         localStorage.setItem(IMG_KEY, JSON.stringify(imgs));
       }catch(e){
-        // 容量超過時は壁紙だけ落とす
         try{
           var imgs2 = {
-            conan:{image:state.profiles.conan.image||'', wallpaper:''},
-            kaori:{image:state.profiles.kaori.image||'', wallpaper:''}
+            conan:{image:state.profiles.conan.image||'', wallpaper:'', imageUpdatedAt:state.profiles.conan.imageUpdatedAt||''},
+            kaori:{image:state.profiles.kaori.image||'', wallpaper:'', imageUpdatedAt:state.profiles.kaori.imageUpdatedAt||''}
           };
           localStorage.setItem(IMG_KEY, JSON.stringify(imgs2));
           toast('⚠️ 容量不足のため壁紙はメモリのみ保持します');
@@ -764,12 +816,19 @@
       try{
         var raw = localStorage.getItem(IMG_KEY); if(!raw) return;
         var imgs = JSON.parse(raw);
-        if(imgs.conan){ state.profiles.conan.image=imgs.conan.image||''; state.profiles.conan.wallpaper=imgs.conan.wallpaper||''; }
-        if(imgs.kaori){ state.profiles.kaori.image=imgs.kaori.image||''; state.profiles.kaori.wallpaper=imgs.kaori.wallpaper||''; }
+        if(imgs.conan){
+          state.profiles.conan.image=imgs.conan.image||'';
+          state.profiles.conan.wallpaper=imgs.conan.wallpaper||'';
+          state.profiles.conan.imageUpdatedAt=imgs.conan.imageUpdatedAt||'';
+        }
+        if(imgs.kaori){
+          state.profiles.kaori.image=imgs.kaori.image||'';
+          state.profiles.kaori.wallpaper=imgs.kaori.wallpaper||'';
+          state.profiles.kaori.imageUpdatedAt=imgs.kaori.imageUpdatedAt||'';
+        }
       }catch(e){ /* ignore */ }
     }
     function saveLocal(){
-      // バックアップは1日1回更新
       try{
         var bkRaw = localStorage.getItem(BACKUP_KEY);
         var bk = bkRaw?JSON.parse(bkRaw):null;
@@ -795,7 +854,7 @@
       }
     }
     function makeSlimState(){
-      // 画像はメインから除外
+      // 本体ストレージから画像と壁紙を除外
       var slim = JSON.parse(JSON.stringify(state));
       ['conan','kaori'].forEach(function(u){
         if(slim.profiles[u]){ slim.profiles[u].image=''; slim.profiles[u].wallpaper=''; }
@@ -846,14 +905,13 @@
       if(!state.profiles.conan.theme) state.profiles.conan.theme='conan_default';
       if(!state.profiles.kaori.theme) state.profiles.kaori.theme='kaori_default';
       ['conan','kaori'].forEach(function(u){
-        ['phone','email','image','wallpaper'].forEach(function(k){ if(!(k in state.profiles[u])) state.profiles[u][k]=''; });
+        ['phone','email','image','wallpaper','imageUpdatedAt'].forEach(function(k){ if(!(k in state.profiles[u])) state.profiles[u][k]=''; });
       });
       state.settings=Object.assign({},DEFAULT_SETTINGS,state.settings||{});
       state.sync=Object.assign({},DEFAULT_SYNC,state.sync||{});
       if(!Array.isArray(state.entries.shared_holidays)) state.entries.shared_holidays=[];
       if(!state.filters.cats.includes('holiday')) state.filters.cats.push('holiday');
       if(!state.filters.cats.includes('dayoff')) state.filters.cats.push('dayoff');
-      // entriesにupdatedAtが無いものは付与
       ['conan','kaori','shared_holidays'].forEach(function(k){
         (state.entries[k]||[]).forEach(function(e){ if(!e.updatedAt) e.updatedAt=new Date(0).toISOString(); });
       });
@@ -1328,9 +1386,16 @@
     }
 
     function getSyncPayload(){
-      // Gistに送るのは「画像を除いた」スリム版＋entries＋設定
+      // 本体はスリム＋プロフィール画像のみ復帰させる（壁紙は除外）
       var p = makeSlimState();
-      // sync内のtoken等は送らない（事故防止）
+      ['conan','kaori'].forEach(function(u){
+        if(p.profiles[u]){
+          p.profiles[u].image = state.profiles[u].image || '';
+          p.profiles[u].imageUpdatedAt = state.profiles[u].imageUpdatedAt || '';
+          // 壁紙は同期しない
+          p.profiles[u].wallpaper = '';
+        }
+      });
       p.sync = {
         gistId: state.sync.gistId,
         autoSync: false,
@@ -1339,7 +1404,6 @@
         githubToken: '',
         lastSavedHash: ''
       };
-      // version
       p.__version = 5;
       p.__savedAt = new Date().toISOString();
       return p;
@@ -1351,7 +1415,6 @@
     }
 
     function syncToGist(isManual){
-      // モーダル内の値も拾う
       if(document.getElementById('settingsSheet').classList.contains('open')){
         state.sync.githubToken = sanitizeToken(document.getElementById('gistTokenInput').value);
         state.sync.gistId = sanitizeGistId(document.getElementById('gistIdInput').value);
@@ -1365,7 +1428,6 @@
       var payloadStr = JSON.stringify(payload);
       var hash = djb2(payloadStr);
       if(!isManual && state.sync.lastSavedHash === hash){
-        // 内容変化なしなら送らない（無駄なAPI消費を防ぐ）
         return;
       }
 
@@ -1401,7 +1463,6 @@
       }).finally(function(){ syncInFlight=false; });
     }
 
-    // 安全マージ: ローカル優先で保持する項目を退避してからremoteを取り込む
     function safeMergeRemote(remote){
       if(!remote || typeof remote !== 'object') return false;
 
@@ -1409,18 +1470,19 @@
       var localOnly = {
         sync: {
           githubToken: state.sync.githubToken||'',
-          gistId: state.sync.gistId||remote?.sync?.gistId||'',
+          gistId: state.sync.gistId||(remote.sync?remote.sync.gistId:'')||'',
           autoSync: !!state.sync.autoSync,
-          encryptedToken: state.sync.encryptedToken||remote?.sync?.encryptedToken||'',
+          encryptedToken: state.sync.encryptedToken||(remote.sync?remote.sync.encryptedToken:'')||'',
           lastSavedHash: state.sync.lastSavedHash||''
         },
-        profiles: {
-          conan: { image: state.profiles.conan.image, wallpaper: state.profiles.conan.wallpaper },
-          kaori: { image: state.profiles.kaori.image, wallpaper: state.profiles.kaori.wallpaper }
+        // 壁紙はローカル限定
+        wallpapers: {
+          conan: state.profiles.conan.wallpaper||'',
+          kaori: state.profiles.kaori.wallpaper||''
         }
       };
 
-      // entriesはID単位で新しい方を採用してマージ
+      // entries: ID単位で updatedAt の新しい方を採用
       var newEntries = { conan: [], kaori: [], shared_holidays: [] };
       ['conan','kaori','shared_holidays'].forEach(function(k){
         var localArr = Array.isArray(state.entries[k]) ? state.entries[k] : [];
@@ -1438,14 +1500,29 @@
         newEntries[k] = Object.keys(map).map(function(id){ return map[id]; });
       });
 
-      // プロフィール（画像以外）と表示設定はremote優先で適用
+      // プロフィールはremote優先で更新、ただし画像は imageUpdatedAt 比較で新しい方を採用
       if(remote.profiles){
         ['conan','kaori'].forEach(function(u){
-          if(remote.profiles[u]){
-            state.profiles[u] = Object.assign({}, state.profiles[u], remote.profiles[u]);
+          if(!remote.profiles[u]) return;
+          var rp = remote.profiles[u];
+          var lp = state.profiles[u];
+          // 画像は updated 比較
+          var localImgT = lp.imageUpdatedAt || '';
+          var remoteImgT = rp.imageUpdatedAt || '';
+          var useRemoteImg = (rp.image && remoteImgT >= localImgT);
+          // 名前/テーマ/連絡先などはremoteを採用
+          state.profiles[u] = Object.assign({}, lp, rp);
+          if(useRemoteImg){
+            state.profiles[u].image = rp.image;
+            state.profiles[u].imageUpdatedAt = remoteImgT || new Date().toISOString();
+          } else {
+            // ローカルの画像を維持
+            state.profiles[u].image = lp.image || '';
+            state.profiles[u].imageUpdatedAt = localImgT;
           }
         });
       }
+
       if(remote.settings) state.settings = Object.assign({}, state.settings, remote.settings);
       if(remote.filters) state.filters = Object.assign({}, state.filters, remote.filters);
 
@@ -1453,12 +1530,9 @@
 
       // ローカル限定項目を復元
       state.sync = Object.assign({}, state.sync, localOnly.sync);
-      ['conan','kaori'].forEach(function(u){
-        if(localOnly.profiles[u].image) state.profiles[u].image = localOnly.profiles[u].image;
-        if(localOnly.profiles[u].wallpaper) state.profiles[u].wallpaper = localOnly.profiles[u].wallpaper;
-      });
+      state.profiles.conan.wallpaper = localOnly.wallpapers.conan;
+      state.profiles.kaori.wallpaper = localOnly.wallpapers.kaori;
 
-      // lastSyncAt はremoteのsavedAtを尊重
       if(remote.__savedAt) state.sync.lastSyncAt = remote.__savedAt;
       else if(remote.sync && remote.sync.lastSyncAt) state.sync.lastSyncAt = remote.sync.lastSyncAt;
 
@@ -1521,7 +1595,8 @@
 
     /* ===== BACKUP / RESTORE ===== */
     function exportBackup(){
-      var snap = makeSlimState();
+      // バックアップには画像も含める
+      var snap = JSON.parse(JSON.stringify(state));
       snap.__exportedAt = new Date().toISOString();
       var blob = new Blob([JSON.stringify(snap, null, 2)], {type:'application/json'});
       var url = URL.createObjectURL(blob);
@@ -1576,6 +1651,7 @@
       compressImage(file,300,300,0.82,200*1024,function(url){
         if(!url) return;
         state.profiles[editingProfileUser].image=url;
+        state.profiles[editingProfileUser].imageUpdatedAt=new Date().toISOString();
         var prev=document.getElementById('profilePreview'); prev.innerHTML='';
         prev.appendChild(createAvatarEl(editingProfileUser,'avatar xl'));
         toast('画像を設定しました ('+Math.round(url.length*0.75/1024)+'KB)');
@@ -1592,6 +1668,7 @@
     }
     function removeProfileImage(){
       state.profiles[editingProfileUser].image='';
+      state.profiles[editingProfileUser].imageUpdatedAt=new Date().toISOString();
       var prev=document.getElementById('profilePreview'); prev.innerHTML='';
       prev.appendChild(createAvatarEl(editingProfileUser,'avatar xl'));
       toast('画像を削除しました');
@@ -1658,7 +1735,6 @@
 
     /* ===== SEED DEMO ===== */
     function seedDemoIfEmpty(){
-      // Gist設定済みなら絶対にseedしない（同期したら知らない予定が増える事故防止）
       if(state.sync.gistId && (state.sync.githubToken||state.sync.encryptedToken)) return;
       var total=state.entries.conan.length+state.entries.kaori.length+state.entries.shared_holidays.length;
       if(total>0) return;
@@ -1694,7 +1770,6 @@
       });
       window.addEventListener('resize',function(){if(window.innerWidth>900) closeSidebar();});
 
-      // フォアグラウンド復帰時にpull（5秒以内の連打は無視）
       document.addEventListener('visibilitychange',function(){
         if(document.visibilityState==='visible'
           && state.sync.autoSync && state.sync.githubToken && state.sync.gistId
@@ -1726,13 +1801,18 @@
       var splash=document.getElementById('splash');
       var done=function(){
         renderProfileGate();
-        // ルート優先
-        if(applySelectedUserFromRoute()){ /* nothing */ }
-        else if(state.settings.showProfileGateOnLaunch){ openProfileGate(); }
-        else { closeProfileGate(); }
-        // PIN 必要なら表示（gistId設定済 & Token空 & 暗号トークンあり）
+        if(applySelectedUserFromRoute()){
+          // ルートでユーザー指定済 → ゲート閉じる
+          closeProfileGate();
+        } else if(state.settings.showProfileGateOnLaunch){
+          // 既に open のまま表示する（HTMLでopenを付けているのでチラつかない）
+          openProfileGate();
+        } else {
+          closeProfileGate();
+        }
+        // PIN必要なら起動時に表示（Tokenが空で、暗号Tokenがあり、GistIDがある）
         if(!state.sync.githubToken && state.sync.encryptedToken && state.sync.gistId){
-          openPinGate();
+          openPinGate('decrypt');
         }
       };
       if(!splash){done();return;}
@@ -1740,23 +1820,20 @@
       setTimeout(function(){ if(splash&&splash.parentNode) splash.parentNode.removeChild(splash); done(); }, 650);
     }
     function playSplash(){
+      // ルート指定がある場合はゲートを先に閉じておく（チラつき防止）
+      if(getSelectedUserFromRoute()) closeProfileGate();
       var splash=document.getElementById('splash');
       if(!splash){ finishSplash(); return; }
       var auto=setTimeout(finishSplash, 1700);
       splash.addEventListener('click',function(){clearTimeout(auto);finishSplash();},{once:true});
-      // animationend が来ない iOS PWA 対策で多重保険
       setTimeout(finishSplash, 3000);
     }
 
     /* ===== SW REGISTER ===== */
     function registerSW(){
       if(!('serviceWorker' in navigator)) return;
-      // 自分のディレクトリ配下で登録
-      var swUrl = './sw.js';
-      // ロード完了後に登録
       window.addEventListener('load', function(){
-        navigator.serviceWorker.register(swUrl, {scope:'./'}).then(function(reg){
-          // 更新検知
+        navigator.serviceWorker.register('./sw.js', {scope:'./'}).then(function(reg){
           if(reg && reg.update){
             try{ reg.update(); }catch(e){}
           }
@@ -1799,6 +1876,7 @@
     window.printCalendar=printCalendar;
     window.inputPin=inputPin;window.clearPin=clearPin;window.skipPin=skipPin;
     window.openPinGateManual=openPinGateManual;
+    window.startPinSetup=startPinSetup;
     window.exportBackup=exportBackup;window.importBackup=importBackup;
 
     init();
